@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <!-- $Id$ -->
+  <title>Getting Started with Hashdeep</title></head>
+  
+  <link rel="stylesheet" type="text/css" href="style.css">
+  
+  <style type="text/css">
+  td {text-align: center}
+  </style>
+
+</head>
+
+<body>
+
+<h1>
+Getting Started with hashdeep
+</h1>
+
+This document provides an introduction to using 
+<a href="http://md5deep.sf.net/">Hashdeep</a>. 
+  <script type="text/javascript">
+  <!--
+    function mon_to_name(mon)
+    {
+      switch(mon)
+      {
+        case 0: return "Jan";
+        case 1: return "Feb";
+        case 2: return "Mar";
+        case 3: return "Apr";
+        case 4: return "May";
+        case 5: return "Jun";
+        case 6: return "Jul";
+        case 7: return "Aug";
+        case 8: return "Sep";
+        case 9: return "Oct";
+        case 10: return "Nov";
+        case 11: return "Dec";
+      }
+      return "";
+    }
+    
+   var basetext = " It was last updated on ";
+
+   var now = new Date(document.lastModified);
+   document.write(basetext + now.getDate() + " " + 
+                 mon_to_name(now.getMonth()) + 
+                 " " + now.getFullYear() + ".");
+
+  // -->
+  </script>
+
+The current version of this document can be found on the
+md5deep web site at
+<a href="http://md5deep.sourceforge.net/">
+http://md5deep.sourceforge.net/</a>. 
+
+<ul>
+<li> <a href="#intro">Introduction</a></li>
+<li> <a href="#install">Installing hashdeep</a></li>
+<li> <a href="#basic">Basic Operation</a></li>
+<li> <a href="#error">Error Messages</a></li>
+<li> <a href="#recursive">Recursive Mode</a></li>
+<br>
+<li> <a href="#time">Time Estimation Mode</a></li>
+<li> <a href="#expert">Expert Mode</a></li>
+<li> <a href="#match">Matching Mode</a></li>
+<li> <a href="#audit">Audit Mode</a> - Where the magic happens!</li>
+<br>
+
+</ul>
+
+<hr>
+
+<h2 id="intro">Introduction</h2>
+
+<p>
+Hashdeep is a program for recursively computing hashes with multiple 
+algorithms simultaneously. It can also perform matching operations like
+the md5deep family of programs, but in a more powerful way. Hashdeep can
+perform an <em>audit</em> of hashes against a set of known hashess. 
+With traditional
+matching, programs report if an input file matched one in a set of knows
+or if the input file did not match. It's hard to get a complete sense of
+the state of the input files compared to the set of knowns. It's possible
+to have matched files, missing files, files that have moved in the set,
+and to find new files not in the set. Hashdeep can report all of these
+conditions. It can even spot hash collisions, when an input file matches a
+known file in one hash algorithm but not in others.
+</p>
+
+<p>
+A full description of an audit and its benefits can be found in the
+paper <a href="http://jessekornblum.com/publications/dfp08.html">
+Auditing Hash Sets: Lessons Learned from Jurassic Park</a>.
+</p>
+
+
+<h2 id="install">Installing hashdeep </h2>
+
+<p>
+Hashdeep is installed with md5deep. Please follow the 
+<a href="start-md5deep.html#install">
+instructions for installing md5deep</a>.
+</p>
+
+
+<h2 id="basic"> Basic Operation </h2>
+
+<h3 id="commandprompt"> Opening a command prompt </h3>
+
+<p>
+Hashdeep is a command line program. You cannot run the program by 
+double clicking on it! On Microsoft Windows, click on the Start button
+and choose "Run..." from the menu. In this dialog box, type <tt>cmd.exe</tt>
+and hit enter. A command prompt should appear. In this window, type
+the full path to hashdeep.exe and the files you want to hash. For example:
+
+<pre> c:\Documents and Settings\jessek\Desktop\hashdeep.exe c:\Windows\*</pre>
+
+Note that you <em>can</em> drag the hashdeep icon into this window and
+the operating system will fill in the path information for you. 
+You can also install the programs in a directory that is included in
+your <tt>PATH</tt> environment variable.
+
+</p>
+
+
+<h3> Computing hashes </h3>
+
+By default, hashdeep produces output with a header, and then, 
+for each input file,
+the file's size, the computed hashes, and the complete filename.
+The header contains the hashdeep file format version, currently 1.0,
+which hashes are contained in the file, and the command line used to 
+invoke the program. We'll see below how to change which hashes are computed.
+The default hashes are MD5 and SHA-256.
+
+<pre>$ hashdeep config.h INSTALL README
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /home/jessek/dir
+## $ hashdeep config.h INSTALL README
+## 
+5584,db19f900dde2507e7138718b987eda57,28a9b958c3be22ef6bd569bb2f4ea451e6bdcd3b0565c676fbd3645850b4e670,/home/jessek/dir/config.h
+9236,d7adbcf07c5c813693ddf958be9c40e3,e77137d635c4e9598d64bc2f3f564f36d895d9cfc5050ea6ca75beafb6e31ec2,/home/jessek/dir/INSTALL
+1609,c15a66414a4196f8bf86f7202199a0cc,343f3e1466662a92fa1804e2fc787e89474295f0ab086059e27ff86535dd1065,/home/jessek/dir/README
+</pre>
+
+If no input files are specified, standard input is hashed. You can either
+pipe the output of other programs into hashdeep or type manually at the 
+command line. To end input from the command line, most shells use 
+Control-D, except for Microsoft Windows, which uses Control-Z.
+
+<pre>$ uname -a | hashdeep
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /home/jessek/dir
+## $ hashdeep
+## 
+160,839893df352ecb723ab5012cbaf3b8e4,c219ba85ba9ddbac3e45977aca1d40b51dc3a63f14d9486f96b2a6d66f1cfd96,stdin
+
+$ hashdeep
+This is a test  [Control-D hit]
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /home/jessek/dir
+## $ hashdeep
+## 
+14,ce114e4501d2f4e2dcea3e17b546f339,c7be1ed902fb8dd4d48997c6452f5d7e509fbcdbe2808b16bcf4edce4c07d14e,stdin
+</pre>
+
+You can also have hashdeep print relative filenames instead of absolute
+ones. That is, omit all of the path information except that specified 
+on the command line. To enable relative paths, use the <tt>-l</tt> flag. 
+Repeating our first example with the <tt>-l</tt> flag:
+
+<pre>$ hashdeep -l ../*
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /home/jessek/dir
+## $ hashdeep config.h INSTALL README
+## 
+5584,db19f900dde2507e7138718b987eda57,28a9b958c3be22ef6bd569bb2f4ea451e6bdcd3b0565c676fbd3645850b4e670,../config.h
+9236,d7adbcf07c5c813693ddf958be9c40e3,e77137d635c4e9598d64bc2f3f564f36d895d9cfc5050ea6ca75beafb6e31ec2,../INSTALL
+1609,c15a66414a4196f8bf86f7202199a0cc,343f3e1466662a92fa1804e2fc787e89474295f0ab086059e27ff86535dd1065,../README</pre>
+
+You can have hashdeep only print out the basename of each 
+file it processes. That is, all directory information will be stripped
+off. To enable basename mode, use the <tt>-b</tt> flag:
+
+<pre>$ hashdeep -b ../*
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /home/jessek/dir
+## $ hashdeep config.h INSTALL README
+## 
+5584,db19f900dde2507e7138718b987eda57,28a9b958c3be22ef6bd569bb2f4ea451e6bdcd3b0565c676fbd3645850b4e670,config.h
+9236,d7adbcf07c5c813693ddf958be9c40e3,e77137d635c4e9598d64bc2f3f564f36d895d9cfc5050ea6ca75beafb6e31ec2,INSTALL
+1609,c15a66414a4196f8bf86f7202199a0cc,343f3e1466662a92fa1804e2fc787e89474295f0ab086059e27ff86535dd1065,README</pre>
+
+
+<br>
+<h2 id="error"> Error messages </h2>
+
+If an input file can't be found, an error message is normally printed.
+These, and all other error messages, can be surpressed by using the 
+<tt>-s</tt> flag.
+
+<pre>$ hashdeep doesnotexist.txt
+/home/jessek/foo.txt: No such file or directory
+
+$ hashdeep -s doesnotexist.txt
+$</pre>
+
+
+<br>
+<h2 id="recursive">Recursive Mode</h2>
+
+Normally, attempting to process a directory will generate an error message.
+Under recursive mode, hashdeep will hash files in the specified directory
+<em>and</em> file in subdirectories. 
+Recursive mode is activated by using 
+the <tt>-r</tt> flag.
+
+<pre>$ hashdeep *
+hashdeep: /home/jessek/archives: Is a directory
+hashdeep: /home/jessek/bin: Is a directory
+
+$ hashdeep -r *
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /home/jessek
+## $ hashdeep -r archives bin lib doc
+21508,6178d221a1714b7e2089565e997d6ad1,92caa3f5754b22ca792e4f8626362d2ef39596b080abfcfed951a86bee82bec3,/home/jessek/archives/foo-1.2.1.tar.gz
+12292,116e77a5dc6af0996597f7bc1b9252a2,c2afc6aa8d5c094a7226db1695d99a37fa858548f5d09aad9e41badfc62b1d27,/home/jessek/archives/bar-0.9.tar.bz2
+145684,4409c1e0b5995c290c2fc3d1d6d74bac,f56881fb277358c95ed3ddf64f28c4ff3f3937e636e17d6a26d42822b16fd4ed,/home/jessek/bin/ls</pre>
+
+
+<br>
+<h2 id="time"> Time Estimation Mode </h2>
+
+When processing large files, it is sometimes helpful to have an estimate
+of the time remaining in the operation. Hashdeep can generate an estimate
+of how long it will take to finish processing the <em>current file</em>.
+The <tt>-e</tt> flag prints this estimate to standard error, like this:
+
+<pre>$ hashdeep -e /dev/hda1
+/dev/hda1: 1MB of 47MB done, 00:00:46 left
+</pre>
+
+When the file is completed, the last time estimate is removed and the
+hash is displayed:
+
+<pre>$ hashedeep -e /dev/hda1
+49545216,fb9be2d90235ca2c8740d86c93aa8cba,9420b32a4831d8bc5377357dd9bcb173b9df96fb4070fa3e6d8b115aec6ae528,/dev/hda1
+
+</pre>
+
+
+<br>
+<h2 id="expert"> Expert mode </h2>
+
+Hashdeep's expert mode allows you to specify which and only which types of
+files are processed. The available file types are:
+
+<ul>
+<li> Regular files, such as text, graphics, and executables.
+
+<li> Block files, such as devices, hard drives, tape drives, CDROMs, etc. 
+
+<li> Character devices, such as /dev/tty. 
+
+<li> Named Pipes
+
+<li> Symbolic Links - Soft links. Note that this option tells the program 
+to follow a symbolic link <em>provided</em> that you have also specified
+the parameter for whatever the link is pointing to. That is, if the 
+symlink points to a directory, you must have also specified -r. If the 
+symbolic links points to a regular file, you must have also specified
+the -o f mode.
+
+<li> Socket - Network connections
+
+<li> Solaris Door - Available only on Solaris
+
+</ul>
+
+To use expert mode, use the <tt>-o</tt> flag followed by the letter or
+letters corresponding to the types of files you want to process.
+
+<br>
+<br>
+
+<table border="1" align="center">
+
+<tr>
+  <td><b>File type</b></td>
+  <td><b>Letter</b></td>
+</tr>
+
+<tr>
+  <td>Regular</td>
+  <td>f</td>
+</tr>
+
+<tr>
+  <td>Block</td>
+  <td>b</td>
+</tr>
+
+<tr>
+  <td>Character</td>
+  <td>c</td>
+</tr>
+
+<tr>
+  <td>Named Pipe</td>
+  <td>p</td>
+</tr>
+
+<tr>
+  <td>Symbolic Link</td>
+  <td>l</td>
+</tr>
+
+<tr>
+  <td>Socket</td>
+  <td>s</td>
+</tr>
+
+<tr>
+  <td>Solaris Door</td>
+  <td>d</td>
+</tr>
+
+</table>
+<br>
+
+Let's say that in the current directory there are files hda (a block device),
+my-link, a symbolic link to a block device, and data.txt, a regular file.
+
+<pre>$ hashdeep -o f *
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /Users/jessek/tmp
+## $ ./hashdeep -o f hda my-link data.txt
+## 
+108544,c314958f0c770a5f2d36cfd086098316,66e427342032c7a8f04319f774be3729f45d7961e4cb01c604ab529eb0f7aea1,/Users/jessek/tmp/data.txt
+$</pre>
+
+Note that only the regular files are hashed. Conversely:
+
+<pre>$ md5deep -o lb *
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /Users/jessek/tmp
+## $ ./hashdeep -o f hda my-link data.txt
+## 
+51344,7d79604c3baf94f9455a759b8187e9d5,fa202940e0d836103bb7d0395c8f6da5eeaacfafa66be21ff4ac205feaf4f96f,/Users/jessek/tmp/my-link
+55480,df3cd5fe1b727f722a09d94aa43f1dd5,4cabb46e691739a876b61f7d45d56d771ee8c5903c283c4b36630c7ae78c5ad9,/Users/jessek/tmp/hda
+$</pre>
+
+Note that the <a href="#recursive">recursive mode</a> can be used
+in conjunction with the expert mode. Directories are ignored without
+the recursive flag.
+
+
+
+<br>
+<h2 id="match"> Matching mode </h2>
+
+<p>
+Like md5deep, hashdeep has the ability to match
+the hashes of input files against a list of known hashes. You can
+do both <em>postive matching</em>, which displays those files that
+<b>do</b> match the list of known hashes, or <em>negative matching</em>,
+which displays those files that <b>do not</b> match the list of known
+hashes.
+</p>
+
+<p>
+When you use the matching modes you must supply hashdeep with a set of 
+known hashes to match against. Hashdeep can only use files of known
+hashes previously generated by hashdeep. These known files must be
+supplied on the command line using the -k flag.
+
+
+<h3>Positive Matching</h3>
+
+Let's say that we have a text file <tt>known-hashes.txt</tt> which
+contains a few hashes:
+
+<pre>%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /Users/jessek/tmp
+## $ hashdeep -l foo bar
+## 
+29,072b9fd431fb55daf1b517dd50c91205,8974bb10444a813c585110ca5f32d2f62a48933a34aca82eb1d83fc063bd7259,foo
+29,94c798f9bfec4955597716c4376eba16,6771ec5566d8d72cd7288dc433d2c2ba0556ecf056a4bfde1f6fa09436a0cec4,bar</pre>
+
+Then, any input files that match either of these
+hashes will be displayed.
+
+<pre>$ hashdeep -m -k known-hashes.txt *
+/Users/jessek/tmp/bar
+/Users/jessek/tmp/foo</pre>
+
+
+If you want to see the hashes along with the filenames, you can use the
+<tt>-M</tt>  flag instead.
+
+<pre>$ hashdeep -M -k known-hashes.txt *
+%%%% HASHDEEP-1.0
+%%%% size,md5,sha256,filename
+## Invoked from: /Users/jessek/tmp
+## $ hashdeep -M -k known-hashes.txt bar foo known-hashes.txt
+## 
+29,94c798f9bfec4955597716c4376eba16,6771ec5566d8d72cd7288dc433d2c2ba0556ecf056a4bfde1f6fa09436a0cec4,/Users/jessek/tmp/bar
+29,072b9fd431fb55daf1b517dd50c91205,8974bb10444a813c585110ca5f32d2f62a48933a34aca82eb1d83fc063bd7259,/Users/jessek/tmp/foo</pre>
+
+If you would like to see filename of the known file that generated the
+match, use the <tt>-w</tt> flag. Continuing our example:
+
+<pre>$ md5deep -w -m -k known-hashes.txt *
+/Users/jessek/tmp/bar matches bar
+/Users/jessek/tmp/foo matches foo
+</pre>
+
+
+
+<h3>Negative Matching</h3>
+
+<p>
+Negative matching is the same as positive matching, above, but displays
+those files that are not in the list of known hashes. Negative matching
+can be enabled using the <tt>-x</tt> flag, or the <tt>-X</tt> flag if
+you want to see the hashes along with the filenames. 
+
+<pre>$ hashdeep -x -k known-hashes.txt *
+/Users/jessek/tmp/NOMATCH
+/Users/jessek/tmp/known-hashes.txt</pre>
+
+</p>
+<p>
+
+The -w flag only works with positive matching, or -m mode. Attempting to
+use -w mode with negative matching produces no more information that
+negative matching does normally:
+
+<pre>$ hashdeep -x -w -k known-hashes.txt *
+/Users/jessek/tmp/NOMATCH
+/Users/jessek/tmp/known-hashes.txt</pre>
+</p>
+
+
+<br>
+<h2 id="audit">Audit Mode</h2>
+
+
+
+<p>
+The real power of hashdeep is the Audit mode. During an audit, the 
+program will not only verify hashes of files, but it will also alert the
+user to any files that have moved, changed, or been inserted into the 
+set of known files. 
+</p>
+
+<p>
+To conduct an audit, the user first computes a set of hashes for known
+files:
+
+<pre>
+C:\> hashdeep -r myfiles > known.txt
+</pre>
+</p>
+
+<p>
+When the user wants to audit this hash set, they use a slightly different
+command line:
+
+<pre>
+C:\> hashdeep -r -a -k known.txt myfiles
+hashdeep: Audit passed
+</pre>
+</p>
+
+The program will report that the audit either passed or failed. If the
+audit passed, this means all of the known files were found unchanged
+in the directory and no new files were added. If this is not the case,
+the audit will fail. More information about why the audit failed
+can be displayed with the -v flag. The -v flag can be repeated multiple
+times, up to three times, to get more information on the status of
+each file.
+
+<!-- RBF - Flesh out audit mode description -->
+
+<hr>
+<a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=67079&type=2" width="125" height="37" border="0" alt="SourceForge.net Logo" /></a>
+
+
+</body>
+</html>
